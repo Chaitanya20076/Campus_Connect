@@ -6,6 +6,7 @@ import ProfileStep from "./sections/ProfileStep/ProfileStep";
 import DiscoverStep from "./sections/DiscoverStep/DiscoverStep";
 import TeammateStep from "./sections/TeammateStep/TeammateStep";
 import ConnectStep from "./sections/ConnectStep/ConnectStep";
+import WorkspaceStep from "./sections/WorkspaceStep/WorkspaceStep";
 function HowItWorks() {
   return (
     <div className="how-it-works-page">
@@ -14,6 +15,7 @@ function HowItWorks() {
       <DiscoverStep />
       <TeammateStep />
       <ConnectStep />
+      <WorkspaceStep />
 
       {/* Upcoming sections will be added here */}
     </div>

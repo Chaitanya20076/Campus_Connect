@@ -12,7 +12,7 @@ import HowItWorks from "./pages/HowItWorks/HowItWorks";
 import Home from "./pages/Home/Home";
 import About from "./pages/About/About";
 import FindTeammates from "./pages/FindTeammates/FindTeammates";
-
+import Terms from "./pages/Terms/Terms";
 // Temporary placeholder until individual pages are developed
 function ComingSoon({ title }) {
   return (
@@ -89,10 +89,7 @@ function App() {
             element={<ComingSoon title="Privacy Policy" />}
           />
 
-          <Route
-            path="/terms"
-            element={<ComingSoon title="Terms & Conditions" />}
-          />
+          <Route path="/terms" element={<Terms />} />
         </Route>
 
         {/* PAGES OUTSIDE THE PUBLIC LAYOUT */}

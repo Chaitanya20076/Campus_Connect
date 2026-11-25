@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import PreAuthLayout from "./components/PreAuthLayout";
-
+import HowItWorks from "./pages/HowItWorks/HowItWorks";
 import Home from "./pages/Home/Home";
 import About from "./pages/About/About";
 // Temporary placeholder until individual pages are developed
@@ -43,6 +43,7 @@ function App() {
         {/* ALL PUBLIC / PRE-LOGIN PAGES */}
         <Route element={<PreAuthLayout />}>
           <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
 
           <Route path="/" element={<Home />} />
 

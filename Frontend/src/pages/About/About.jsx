@@ -7,6 +7,7 @@ import "./About.css";
 import Solution from "./sections/Solution/Solution";
 import VisionMission from "./sections/VisionMission/VisionMission";
 import Team from "./sections/Team/Team";
+import Hackathon from "./sections/Hackathon/Hackathon";
 function About() {
   return (
     <div className="about-page">
@@ -14,6 +15,7 @@ function About() {
       <Problem />
       <Solution />
       <VisionMission />
+      <Hackathon />
       <Team />
 
       {/* Upcoming sections will be added here */}

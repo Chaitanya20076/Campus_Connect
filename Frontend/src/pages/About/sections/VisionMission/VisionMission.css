@@ -1,0 +1,333 @@
+
+.vm-section {
+  width: 100%;
+  padding: 115px 7% 110px;
+  background: #FAF4EB;
+  position: relative;
+  overflow: hidden;
+}
+
+.vm-container {
+  max-width: 1350px;
+  margin: 0 auto;
+}
+
+/* SECTION HEADING */
+
+.vm-heading {
+  max-width: 780px;
+  margin: 0 auto 65px;
+  text-align: center;
+}
+
+.vm-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #BD7836;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 22px;
+}
+
+.vm-heading h2 {
+  color: #1F273E;
+  font-size: clamp(35px, 4.5vw, 57px);
+  line-height: 1.13;
+  letter-spacing: -2px;
+  font-weight: 800;
+  margin: 0 0 22px;
+}
+
+.vm-heading h2 span {
+  color: #BD7836;
+}
+
+.vm-heading p {
+  max-width: 630px;
+  margin: 0 auto;
+  color: #77766F;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+/* VISION AND MISSION GRID */
+
+.vm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 23px;
+}
+
+.vm-card {
+  min-height: 410px;
+  position: relative;
+  overflow: hidden;
+  padding: 32px;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vm-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(31, 39, 62, 0.12);
+}
+
+/* VISION CARD */
+
+.vm-vision {
+  background: #1F273E;
+  color: #FFFCF7;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vm-vision .vm-card-content h3 {
+  color: #FFFCF7 !important;
+}
+
+.vm-vision .vm-card-content h3 span {
+  color: #F1C18C !important;
+}
+
+.vm-vision .vm-card-content p {
+  color: #D0D4DF !important;
+}
+
+/* MISSION CARD */
+
+.vm-mission {
+  background: #F3EADF;
+  color: #1F273E;
+  border: 1px solid rgba(31, 39, 62, 0.09);
+}
+
+.vm-mission .vm-card-content h3 {
+  color: #1F273E !important;
+}
+
+.vm-mission .vm-card-content h3 span {
+  color: #BD7836 !important;
+}
+
+.vm-mission .vm-card-content p {
+  color: #77766F !important;
+}
+
+/* CARD TOP */
+
+.vm-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.vm-icon {
+  width: 53px;
+  height: 53px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #F1C18C;
+  background: rgba(220, 152, 81, 0.15);
+}
+
+.vm-card-top > span {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  opacity: 0.8;
+}
+
+.vm-vision .vm-card-top > span {
+  color: #E5E7ED;
+}
+
+.vm-mission .vm-card-top > span {
+  color: #555D70;
+}
+
+/* CARD CONTENT */
+
+.vm-card-content {
+  position: relative;
+  z-index: 2;
+  margin-top: 48px;
+  max-width: 460px;
+}
+
+.vm-card-content h3 {
+  font-size: clamp(27px, 3vw, 36px);
+  line-height: 1.2;
+  letter-spacing: -1px;
+  font-weight: 800;
+  margin: 0 0 20px;
+}
+
+.vm-card-content p {
+  max-width: 420px;
+  font-size: 12px;
+  line-height: 1.95;
+  margin: 0;
+}
+
+/* DECORATIVE BACKGROUND TEXT */
+
+.vm-card-decoration {
+  position: absolute;
+  bottom: -30px;
+  right: 12px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.vm-card-decoration span {
+  font-size: 88px;
+  font-weight: 900;
+  letter-spacing: -6px;
+  opacity: 0.055;
+  white-space: nowrap;
+}
+
+.vm-vision .vm-card-decoration span {
+  color: #FFFFFF;
+}
+
+.vm-mission .vm-card-decoration span {
+  color: #1F273E;
+}
+
+.vm-card-arrow {
+  position: absolute;
+  bottom: 29px;
+  right: 30px;
+  color: #DC9851;
+  z-index: 2;
+}
+
+/* BELIEF STATEMENT */
+
+.vm-belief {
+  margin-top: 55px;
+  padding: 26px 30px;
+  background: #FFFCF7;
+  border: 1px solid rgba(31, 39, 62, 0.07);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 19px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vm-belief-icon {
+  width: 49px;
+  height: 49px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #BD7836;
+  background: #F3EADF;
+  border-radius: 14px;
+}
+
+.vm-belief-content span {
+  color: #BD7836;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.vm-belief-content p {
+  color: #1F273E;
+  font-size: 16px;
+  font-weight: 750;
+  margin: 6px 0 0;
+}
+
+.vm-belief-mark {
+  margin-left: auto;
+  color: rgba(31, 39, 62, 0.08);
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: -3px;
+}
+
+/* TABLET */
+
+@media (max-width: 850px) {
+  .vm-section {
+    padding: 90px 5%;
+  }
+
+  .vm-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vm-card {
+    min-height: 370px;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .vm-section {
+    padding: 75px 20px;
+  }
+
+  .vm-heading {
+    margin-bottom: 42px;
+  }
+
+  .vm-heading h2 {
+    font-size: 35px;
+    letter-spacing: -1.2px;
+  }
+
+  .vm-heading p {
+    font-size: 12px;
+  }
+
+  .vm-card {
+    min-height: 360px;
+    padding: 25px 23px;
+  }
+
+  .vm-card-content {
+    margin-top: 40px;
+  }
+
+  .vm-card-content h3 {
+    font-size: 29px;
+  }
+
+  .vm-card-content p {
+    font-size: 11px;
+  }
+
+  .vm-card-decoration span {
+    font-size: 65px;
+    letter-spacing: -4px;
+  }
+
+  .vm-belief {
+    padding: 22px 17px;
+    gap: 13px;
+  }
+
+  .vm-belief-content p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .vm-belief-mark {
+    font-size: 26px;
+  }
+}

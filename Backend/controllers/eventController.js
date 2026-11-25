@@ -1,8 +1,12 @@
 
 import { discoverEvents } from "../services/events/eventDiscoveryService.js";
+import { getEventByCCID } from "../services/events/eventStore.js";
 
+// POST /api/events/discover
 export async function discoverEventsController(req, res) {
   try {
+    console.log("📥 Event discovery request received");
+
     const {
       query,
       location = "",
@@ -38,8 +42,6 @@ export async function discoverEventsController(req, res) {
       });
     }
 
-    console.log("📥 Event discovery request received");
-
     const result = await discoverEvents({
       query: query.trim(),
       location:
@@ -51,12 +53,54 @@ export async function discoverEventsController(req, res) {
     });
 
     return res.status(200).json(result);
+
   } catch (error) {
     console.error("Event discovery controller error:", error);
 
     return res.status(500).json({
       success: false,
       message: error.message || "Unable to discover events",
+    });
+  }
+}
+
+// GET /api/events/:ccid
+export function getEventDetailsController(req, res) {
+  try {
+    const { ccid } = req.params;
+
+    console.log(`📥 Event details requested: ${ccid}`);
+
+    if (!ccid || !/^CC-\d{4}-[A-F0-9]{8}$/i.test(ccid)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid CampusConnect Event ID",
+      });
+    }
+
+    const event = getEventByCCID(ccid.toUpperCase());
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message:
+          "Event not found. It may not have been discovered in this server session.",
+        ccid: ccid.toUpperCase(),
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Event details retrieved successfully",
+      event,
+    });
+
+  } catch (error) {
+    console.error("Event details controller error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to retrieve event details",
     });
   }
 }

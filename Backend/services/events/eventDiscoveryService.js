@@ -5,6 +5,7 @@ import { validateExtractedEvents } from "./eventValidationService.js";
 import { deduplicateEvents } from "../../utils/eventDeduplication.js";
 import { generateCCID } from "../../utils/generateCCID.js";
 import { findEventCoverImage } from "./eventImageService.js";
+import { saveEvents } from "./eventStore.js";
 
 // Temporary in-memory cache.
 // CCIDs remain stable while this server process is running.
@@ -172,6 +173,13 @@ export async function discoverEvents({
 
   // 6. Assign unique CampusConnect IDs.
   processedEvents = processedEvents.map(assignCCID);
+
+  // 7. Save discovered events in temporary in-memory storage.
+  saveEvents(processedEvents);
+
+  console.log(
+    `💾 Stored ${processedEvents.length} events in temporary memory`
+  );
 
   console.log(
     `🎉 Event discovery completed: ${processedEvents.length} events`

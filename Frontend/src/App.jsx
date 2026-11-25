@@ -11,6 +11,8 @@ import PreAuthLayout from "./components/PreAuthLayout";
 import HowItWorks from "./pages/HowItWorks/HowItWorks";
 import Home from "./pages/Home/Home";
 import About from "./pages/About/About";
+import FindTeammates from "./pages/FindTeammates/FindTeammates";
+
 // Temporary placeholder until individual pages are developed
 function ComingSoon({ title }) {
   return (
@@ -54,7 +56,7 @@ function App() {
 
           <Route
             path="/find-teammates"
-            element={<ComingSoon title="Find Teammates" />}
+            element={<FindTeammates />}
           />
 
           <Route
@@ -91,7 +93,6 @@ function App() {
             path="/terms"
             element={<ComingSoon title="Terms & Conditions" />}
           />
-
         </Route>
 
         {/* PAGES OUTSIDE THE PUBLIC LAYOUT */}
@@ -116,8 +117,6 @@ function App() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-        
-        
 
       </Routes>
     </BrowserRouter>

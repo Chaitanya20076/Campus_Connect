@@ -16,7 +16,7 @@ import "./Navbar.css";
 
 const navLinks = [
   { name: "Home", path: "/" },
-  { name: "About Us", path: "/#about" },
+  { name: "About Us", path: "/about" },
   { name: "How It Works", path: "/#how-it-works" },
   {
     name: "Explore Events",

@@ -10,7 +10,7 @@ import {
 import PreAuthLayout from "./components/PreAuthLayout";
 
 import Home from "./pages/Home/Home";
-
+import About from "./pages/About/About";
 // Temporary placeholder until individual pages are developed
 function ComingSoon({ title }) {
   return (
@@ -42,6 +42,7 @@ function App() {
 
         {/* ALL PUBLIC / PRE-LOGIN PAGES */}
         <Route element={<PreAuthLayout />}>
+          <Route path="/about" element={<About />} />
 
           <Route path="/" element={<Home />} />
 
@@ -114,6 +115,8 @@ function App() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
+        
+        
 
       </Routes>
     </BrowserRouter>

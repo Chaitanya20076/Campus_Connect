@@ -1,11 +1,14 @@
 
 import React from "react";
+import HowHero from "./sections/HowHero/HowHero";
 import "./HowItWorks.css";
 
 function HowItWorks() {
   return (
     <div className="how-it-works-page">
-      {/* Sections will be added here */}
+      <HowHero />
+
+      {/* Upcoming sections will be added here */}
     </div>
   );
 }

@@ -1,0 +1,58 @@
+
+/* =========================================
+   CAMPUSCONNECT - APP STYLES
+========================================= */
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.app {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Main page wrapper */
+main {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Remove unwanted default link styling */
+a {
+  text-decoration: none;
+}
+
+/* Consistent button behaviour */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Images should never overflow */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Selection colour */
+::selection {
+  background: #DC9851;
+  color: #1F273E;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove horizontal overflow */
+body {
+  overflow-x: hidden;
+}

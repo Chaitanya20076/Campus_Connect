@@ -5,6 +5,7 @@ import "./HowItWorks.css";
 import ProfileStep from "./sections/ProfileStep/ProfileStep";
 import DiscoverStep from "./sections/DiscoverStep/DiscoverStep";
 import TeammateStep from "./sections/TeammateStep/TeammateStep";
+import ConnectStep from "./sections/ConnectStep/ConnectStep";
 function HowItWorks() {
   return (
     <div className="how-it-works-page">
@@ -12,6 +13,7 @@ function HowItWorks() {
       <ProfileStep />
       <DiscoverStep />
       <TeammateStep />
+      <ConnectStep />
 
       {/* Upcoming sections will be added here */}
     </div>

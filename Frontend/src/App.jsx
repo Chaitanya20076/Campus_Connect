@@ -13,6 +13,7 @@ import Home from "./pages/Home/Home";
 import About from "./pages/About/About";
 import FindTeammates from "./pages/FindTeammates/FindTeammates";
 import Terms from "./pages/Terms/Terms";
+import Privacy from "./pages/Privacy/Privacy";
 // Temporary placeholder until individual pages are developed
 function ComingSoon({ title }) {
   return (
@@ -84,10 +85,7 @@ function App() {
             element={<ComingSoon title="Contact Us" />}
           />
 
-          <Route
-            path="/privacy"
-            element={<ComingSoon title="Privacy Policy" />}
-          />
+          <Route path="/privacy" element={<Privacy />} />
 
           <Route path="/terms" element={<Terms />} />
         </Route>

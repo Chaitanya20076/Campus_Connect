@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   BrowserRouter,
@@ -16,6 +15,8 @@ import Events from "./pages/Events/Events";
 import FindTeammates from "./pages/FindTeammates/FindTeammates";
 import Terms from "./pages/Terms/Terms";
 import Privacy from "./pages/Privacy/Privacy";
+import Login from "./pages/Login/Login";
+import Signup from "./pages/Signup/Signup";
 
 // Temporary placeholder until individual pages are developed
 function ComingSoon({ title }) {
@@ -45,43 +46,18 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* ALL PUBLIC / PRE-LOGIN PAGES */}
+        {/* PUBLIC PAGES WITH THE PRE-AUTH NAVBAR / FOOTER */}
         <Route element={<PreAuthLayout />}>
-
           <Route path="/" element={<Home />} />
-
           <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
 
-          <Route
-            path="/how-it-works"
-            element={<HowItWorks />}
-          />
-
-          {/* EVENT DISCOVERY */}
-          <Route
-            path="/events"
-            element={<Events />}
-          />
-
-          <Route
-            path="/find-teammates"
-            element={<FindTeammates />}
-          />
+          <Route path="/events" element={<Events />} />
+          <Route path="/find-teammates" element={<FindTeammates />} />
 
           <Route
             path="/event-details/:eventId"
             element={<ComingSoon title="Event Details" />}
-          />
-
-          <Route
-            path="/login"
-            element={<ComingSoon title="Welcome Back" />}
-          />
-
-          <Route
-            path="/signup"
-            element={<ComingSoon title="Join CampusConnect" />}
           />
 
           <Route
@@ -95,13 +71,14 @@ function App() {
           />
 
           <Route path="/privacy" element={<Privacy />} />
-
           <Route path="/terms" element={<Terms />} />
-
         </Route>
 
-        {/* PAGES OUTSIDE THE PUBLIC LAYOUT */}
+        {/* FULL-SCREEN AUTH PAGE — OUTSIDE PRE-AUTH LAYOUT */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
+        {/* PAGES OUTSIDE THE PUBLIC LAYOUT */}
         <Route
           path="/student-dashboard"
           element={<ComingSoon title="Student Dashboard" />}
@@ -123,7 +100,6 @@ function App() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-
       </Routes>
     </BrowserRouter>
   );

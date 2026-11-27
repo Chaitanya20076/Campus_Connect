@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,20 +12,13 @@ import {
 
 import "./Navbar.css";
 
-
+// Explore Events is now a single navigation link.
+// The Technical Events and Non-Technical Events subcategories are removed.
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "About Us", path: "/about" },
   { name: "How It Works", path: "/how-it-works" },
-  {
-    name: "Explore Events",
-    path: "/events",
-    dropdown: [
-      { name: "All Events", path: "/events" },
-      { name: "Technical Events", path: "/events?category=technical" },
-      { name: "Non-Technical Events", path: "/events?category=non-technical" },
-    ],
-  },
+  { name: "Explore Events", path: "/events" },
   { name: "Find Teammates", path: "/find-teammates" },
   {
     name: "More",
@@ -39,22 +31,19 @@ const navLinks = [
   },
 ];
 
-
 function Navbar() {
   const location = useLocation();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [eventsOpen, setEventsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  // Close menus whenever the route changes
+  // Close menus whenever the route changes.
   useEffect(() => {
     setMobileOpen(false);
-    setEventsOpen(false);
     setMoreOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
-  // Prevent background scrolling when mobile menu is open
+  // Prevent background scrolling while the mobile menu is open.
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
 
@@ -63,7 +52,6 @@ function Navbar() {
     };
   }, [mobileOpen]);
 
-  // Check active navigation link
   const isActive = (path) => {
     if (!path) return false;
 
@@ -85,31 +73,19 @@ function Navbar() {
     return location.pathname === path;
   };
 
-  // Check whether a dropdown contains the active route
-  const isDropdownActive = (items) => {
-    return items?.some((item) => {
+  const isDropdownActive = (items) =>
+    items?.some((item) => {
       const itemPath = item.path.split("?")[0];
-
       return location.pathname === itemPath;
     });
-  };
 
-  // Close all menus
   const closeMenus = () => {
     setMobileOpen(false);
-    setEventsOpen(false);
     setMoreOpen(false);
   };
 
-  // Mobile dropdown toggle
-  const toggleDropdown = (name) => {
-    if (name === "More") {
-      setMoreOpen((prev) => !prev);
-      setEventsOpen(false);
-    } else {
-      setEventsOpen((prev) => !prev);
-      setMoreOpen(false);
-    }
+  const toggleMore = () => {
+    setMoreOpen((previous) => !previous);
   };
 
   return (
@@ -117,16 +93,10 @@ function Navbar() {
       {/* NAVBAR */}
       <header className="cc-navbar">
         <div className="cc-navbar-inner">
-
           {/* BRAND */}
-          <Link
-            to="/"
-            className="cc-brand"
-            onClick={closeMenus}
-          >
+          <Link to="/" className="cc-brand" onClick={closeMenus}>
             <div className="cc-brand-icon">
               <UsersRound size={28} strokeWidth={2.3} />
-
               <span className="cc-brand-sparkle">
                 <Sparkles size={12} />
               </span>
@@ -136,7 +106,6 @@ function Navbar() {
               <div className="cc-brand-name">
                 Campus<span>Connect</span>
               </div>
-
               <div className="cc-brand-tagline">
                 DISCOVER. CONNECT. COLLABORATE.
               </div>
@@ -167,7 +136,6 @@ function Navbar() {
                       <ChevronDown size={15} />
                     </Link>
 
-                    {/* DESKTOP DROPDOWN */}
                     <div className="cc-dropdown-menu">
                       {link.dropdown.map((item) => (
                         <Link
@@ -197,17 +165,11 @@ function Navbar() {
 
           {/* DESKTOP ACTION BUTTONS */}
           <div className="cc-navbar-actions">
-            <Link
-              to="/login"
-              className="cc-login-btn"
-            >
+            <Link to="/login" className="cc-login-btn">
               Log in
             </Link>
 
-            <Link
-              to="/signup"
-              className="cc-signup-btn"
-            >
+            <Link to="/signup" className="cc-signup-btn">
               Get Started
               <ArrowRight size={16} />
             </Link>
@@ -216,17 +178,13 @@ function Navbar() {
           {/* MOBILE MENU BUTTON */}
           <button
             className="cc-mobile-toggle"
-            onClick={() => setMobileOpen((prev) => !prev)}
+            onClick={() => setMobileOpen((previous) => !previous)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
+            type="button"
           >
-            {mobileOpen ? (
-              <X size={24} />
-            ) : (
-              <Menu size={24} />
-            )}
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
-
         </div>
       </header>
 
@@ -234,7 +192,6 @@ function Navbar() {
       <AnimatePresence>
         {mobileOpen && (
           <>
-            {/* BACKDROP */}
             <motion.div
               className="cc-mobile-backdrop"
               initial={{ opacity: 0 }}
@@ -243,7 +200,6 @@ function Navbar() {
               onClick={closeMenus}
             />
 
-            {/* MENU PANEL */}
             <motion.div
               className="cc-mobile-menu"
               initial={{ opacity: 0, y: -15 }}
@@ -264,39 +220,21 @@ function Navbar() {
                       <>
                         <button
                           className={`cc-mobile-link cc-mobile-dropdown-trigger ${
-                            isActive(link.path) ||
-                            isDropdownActive(link.dropdown)
-                              ? "active"
-                              : ""
+                            isDropdownActive(link.dropdown) ? "active" : ""
                           }`}
-                          onClick={() => toggleDropdown(link.name)}
-                          aria-expanded={
-                            link.name === "More"
-                              ? moreOpen
-                              : eventsOpen
-                          }
+                          onClick={toggleMore}
+                          aria-expanded={moreOpen}
+                          type="button"
                         >
                           {link.name}
-
                           <ChevronDown
                             size={17}
-                            className={
-                              (
-                                link.name === "More"
-                                  ? moreOpen
-                                  : eventsOpen
-                              )
-                                ? "rotated"
-                                : ""
-                            }
+                            className={moreOpen ? "rotated" : ""}
                           />
                         </button>
 
-                        {/* MOBILE SUBMENU */}
                         <AnimatePresence>
-                          {(link.name === "More"
-                            ? moreOpen
-                            : eventsOpen) && (
+                          {moreOpen && (
                             <motion.div
                               className="cc-mobile-submenu"
                               initial={{ height: 0, opacity: 0 }}

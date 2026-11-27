@@ -64,11 +64,24 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", text: "" });
+  const [step, setStep] = useState("details");
+  const [otp, setOtp] = useState("");
+  const [resendSeconds, setResendSeconds] = useState(0);
+
+  // Configure VITE_API_BASE_URL when the frontend and API are hosted separately.
+  // In local development, the Vite proxy should forward /api to the Express backend.
+  const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 
   useEffect(() => {
     const timer = window.setInterval(() => setSlideIndex((n) => (n + 1) % slides.length), 5000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (resendSeconds <= 0) return undefined;
+    const timer = window.setInterval(() => setResendSeconds((seconds) => Math.max(0, seconds - 1)), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendSeconds]);
 
   const clearFeedback = () => setFeedback({ type: "", text: "" });
 
@@ -76,7 +89,15 @@ export default function Signup() {
     event.preventDefault();
     clearFeedback();
 
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setFeedback({ type: "error", text: "Enter your email address to continue." });
+      return;
+    }
+    if (password.length < 6) {
+      setFeedback({ type: "error", text: "Your password must contain at least 6 characters." });
+      return;
+    }
     if (password !== confirmPassword) {
       setFeedback({ type: "error", text: "Your passwords don't match. Please check them." });
       return;
@@ -84,11 +105,76 @@ export default function Signup() {
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, cleanEmail, password);
-      // Account creation is complete. Collect profile details in onboarding.
+      const response = await fetch(`${API_BASE_URL}/api/otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || "We couldn't send your verification code. Please try again.");
+      }
+      setEmail(cleanEmail);
+      setOtp("");
+      setStep("verify");
+      setResendSeconds(Number(data.resendAfterSeconds) || 45);
+      setFeedback({ type: "success", text: `We've sent a 6-digit verification code to ${cleanEmail}.` });
+    } catch (error) {
+      setFeedback({ type: "error", text: error.message || "Unable to send the OTP. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (event) => {
+    event.preventDefault();
+    clearFeedback();
+    if (!/^\d{6}$/.test(otp)) {
+      setFeedback({ type: "error", text: "Enter the 6-digit code sent to your email." });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), otp }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success !== true) {
+        throw new Error(data.message || "That code is invalid or expired. Please try again.");
+      }
+
+      // Firebase account is created only after the backend confirms the OTP.
+      await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
       navigate("/onboarding", { replace: true, state: { onboardingRequired: true } });
     } catch (error) {
       setFeedback({ type: "error", text: authError(error) });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendSeconds > 0 || loading) return;
+    clearFeedback();
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success === false) {
+        throw new Error(data.message || "We couldn't resend the code. Please try again.");
+      }
+      setOtp("");
+      setResendSeconds(Number(data.resendAfterSeconds) || 45);
+      setFeedback({ type: "success", text: "A fresh verification code has been sent." });
+    } catch (error) {
+      setFeedback({ type: "error", text: error.message || "Unable to resend the code." });
     } finally {
       setLoading(false);
     }
@@ -266,42 +352,67 @@ export default function Signup() {
             <p>Start with the basics. Complete your profile after signing up.</p>
           </header>
 
-          <form className="cc-signup-form" onSubmit={handleSignup}>
-            <div className="cc-signup-field">
-              <label htmlFor="cc-signup-email">Email address</label>
-              <div className="cc-signup-input">
-                <Mail size={17}/>
-                <input id="cc-signup-email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={e=>{setEmail(e.target.value);clearFeedback();}} required />
+          {step === "details" ? (
+            <form className="cc-signup-form" onSubmit={handleSignup}>
+              <div className="cc-signup-field">
+                <label htmlFor="cc-signup-email">Email address</label>
+                <div className="cc-signup-input">
+                  <Mail size={17}/>
+                  <input id="cc-signup-email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={e=>{setEmail(e.target.value);clearFeedback();}} required />
+                </div>
               </div>
-            </div>
 
-            <div className="cc-signup-field">
-              <label htmlFor="cc-signup-password">Password</label>
-              <div className="cc-signup-input">
-                <LockKeyhole size={16}/>
-                <input id="cc-signup-password" type={showPassword?"text":"password"} autoComplete="new-password" placeholder="At least 6 characters" minLength={6} value={password} onChange={e=>{setPassword(e.target.value);clearFeedback();}} required />
-                <button type="button" className="cc-signup-eye" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?"Hide password":"Show password"}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button>
+              <div className="cc-signup-field">
+                <label htmlFor="cc-signup-password">Password</label>
+                <div className="cc-signup-input">
+                  <LockKeyhole size={16}/>
+                  <input id="cc-signup-password" type={showPassword?"text":"password"} autoComplete="new-password" placeholder="At least 6 characters" minLength={6} value={password} onChange={e=>{setPassword(e.target.value);clearFeedback();}} required />
+                  <button type="button" className="cc-signup-eye" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?"Hide password":"Show password"}>{showPassword?<EyeOff size={16}/>:<Eye size={16}/>}</button>
+                </div>
               </div>
-            </div>
 
-            <div className="cc-signup-field">
-              <label htmlFor="cc-signup-confirm">Confirm password</label>
-              <div className="cc-signup-input">
-                <LockKeyhole size={16}/>
-                <input id="cc-signup-confirm" type={showConfirm?"text":"password"} autoComplete="new-password" placeholder="Re-enter your password" minLength={6} value={confirmPassword} onChange={e=>{setConfirmPassword(e.target.value);clearFeedback();}} required />
-                <button type="button" className="cc-signup-eye" onClick={()=>setShowConfirm(v=>!v)} aria-label={showConfirm?"Hide password":"Show password"}>{showConfirm?<EyeOff size={16}/>:<Eye size={16}/>}</button>
+              <div className="cc-signup-field">
+                <label htmlFor="cc-signup-confirm">Confirm password</label>
+                <div className="cc-signup-input">
+                  <LockKeyhole size={16}/>
+                  <input id="cc-signup-confirm" type={showConfirm?"text":"password"} autoComplete="new-password" placeholder="Re-enter your password" minLength={6} value={confirmPassword} onChange={e=>{setConfirmPassword(e.target.value);clearFeedback();}} required />
+                  <button type="button" className="cc-signup-eye" onClick={()=>setShowConfirm(v=>!v)} aria-label={showConfirm?"Hide password":"Show password"}>{showConfirm?<EyeOff size={16}/>:<Eye size={16}/>}</button>
+                </div>
               </div>
-            </div>
 
-            {feedback.text && <div className={`cc-signup-feedback ${feedback.type}`} role="alert">{feedback.type==="success"?<CheckCircle2 size={16}/>:<AlertCircle size={16}/>}<span>{feedback.text}</span><button type="button" onClick={clearFeedback} aria-label="Dismiss message"><X size={14}/></button></div>}
+              {feedback.text && <div className={`cc-signup-feedback ${feedback.type}`} role="alert">{feedback.type==="success"?<CheckCircle2 size={16}/>:<AlertCircle size={16}/>}<span>{feedback.text}</span><button type="button" onClick={clearFeedback} aria-label="Dismiss message"><X size={14}/></button></div>}
 
-            <button className="cc-signup-submit" type="submit" disabled={loading||googleLoading}>
-              {loading?<><LoaderCircle size={17} className="cc-signup-spinner"/> Creating account...</>:<>Create your CampusConnect account <ArrowRight size={17}/></>}
-            </button>
-          </form>
+              <button className="cc-signup-submit" type="submit" disabled={loading||googleLoading}>
+                {loading?<><LoaderCircle size={17} className="cc-signup-spinner"/> Sending verification code...</>:<>Next: Verify email <ArrowRight size={17}/></>}
+              </button>
+            </form>
+          ) : (
+            <form className="cc-signup-form cc-signup-otp-form" onSubmit={handleVerifyOtp}>
+              <div className="cc-signup-otp-intro">
+                <span className="cc-signup-otp-icon"><Mail size={23}/></span>
+                <h3>Check your inbox</h3>
+                <p>We've sent a 6-digit verification code to <strong>{email}</strong>. Enter it below to verify your email.</p>
+              </div>
+              <div className="cc-signup-field">
+                <label htmlFor="cc-signup-otp">Email verification code</label>
+                <div className="cc-signup-input cc-signup-otp-input">
+                  <input id="cc-signup-otp" type="text" inputMode="numeric" autoComplete="one-time-code" placeholder="000000" maxLength={6} pattern="[0-9]{6}" value={otp} onChange={e=>{setOtp(e.target.value.replace(/\D/g, "").slice(0,6));clearFeedback();}} required />
+                </div>
+              </div>
+              {feedback.text && <div className={`cc-signup-feedback ${feedback.type}`} role="alert">{feedback.type==="success"?<CheckCircle2 size={16}/>:<AlertCircle size={16}/>}<span>{feedback.text}</span><button type="button" onClick={clearFeedback} aria-label="Dismiss message"><X size={14}/></button></div>}
+              <button className="cc-signup-submit" type="submit" disabled={loading||otp.length!==6}>
+                {loading?<><LoaderCircle size={17} className="cc-signup-spinner"/> Verifying email...</>:<>Verify & create account <ArrowRight size={17}/></>}
+              </button>
+              <div className="cc-signup-otp-actions">
+                <button type="button" onClick={handleResendOtp} disabled={loading||resendSeconds>0}>{resendSeconds>0?`Resend code in ${resendSeconds}s`:"Resend code"}</button>
+                <button type="button" onClick={()=>{setStep("details");setOtp("");clearFeedback();}} disabled={loading}>Change email</button>
+              </div>
+              <p className="cc-signup-otp-hint">Didn't receive it? Check your spam folder before requesting another code.</p>
+            </form>
+          )}
 
-          <div className="cc-signup-divider"><span>OR CONTINUE WITH</span></div>
-          <button className="cc-signup-google" type="button" onClick={handleGoogleSignup} disabled={loading||googleLoading}>{googleLoading?<LoaderCircle size={17} className="cc-signup-spinner"/>:<GoogleMark/>}{googleLoading?"Connecting to Google...":"Continue with Google"}</button>
+          {step === "details" && <><div className="cc-signup-divider"><span>OR CONTINUE WITH</span></div>
+          <button className="cc-signup-google" type="button" onClick={handleGoogleSignup} disabled={loading||googleLoading}>{googleLoading?<LoaderCircle size={17} className="cc-signup-spinner"/>:<GoogleMark/>}{googleLoading?"Connecting to Google...":"Continue with Google"}</button></>}
           <div className="cc-signup-signin">Already have an account? <Link to="/login">Sign in <ArrowRight size={14}/></Link></div>
           <p className="cc-signup-legal">By joining, you become part of a community built to discover, connect and collaborate.</p>
         </div>

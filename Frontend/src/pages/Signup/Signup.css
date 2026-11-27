@@ -77,3 +77,7 @@
 .cc-signup-legal{margin-top:17px}
 @media(max-width:850px){.cc-signup-panel{align-items:center}.cc-signup-panel-inner{max-width:470px}}
 @media(max-width:520px){.cc-signup-form{gap:14px}.cc-signup-input{min-height:47px}.cc-signup-heading{margin-bottom:23px}}
+
+
+/* Email OTP verification step */
+.cc-signup-otp-intro{text-align:center;margin:0 0 7px}.cc-signup-otp-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto 13px;color:var(--ccs-orange-dark);background:rgba(220,152,81,.13);border:1px solid rgba(220,152,81,.22);border-radius:17px}.cc-signup-otp-intro h3{margin:0 0 7px;color:var(--ccs-ink);font-family:Manrope,sans-serif;font-size:23px;font-weight:800;letter-spacing:-.7px}.cc-signup-otp-intro p{max-width:350px;margin:0 auto;color:var(--ccs-muted);font-size:11px;line-height:1.7}.cc-signup-otp-intro p strong{color:var(--ccs-ink);overflow-wrap:anywhere}.cc-signup-otp-input{justify-content:center;min-height:58px}.cc-signup-otp-input input{width:100%;text-align:center;font-size:25px!important;font-weight:800;letter-spacing:12px;padding-left:12px}.cc-signup-otp-actions{display:flex;align-items:center;justify-content:space-between;gap:12px}.cc-signup-otp-actions button{padding:4px 0;color:var(--ccs-orange-dark);background:transparent;border:0;font:inherit;font-size:10px;font-weight:800;cursor:pointer}.cc-signup-otp-actions button:disabled{color:#AFA69C;cursor:not-allowed}.cc-signup-otp-hint{margin:0;color:#9A9188;font-size:9px;line-height:1.6;text-align:center}.cc-signup-otp-form{gap:15px}

@@ -61,3 +61,19 @@
 @media(max-width:1100px){.cc-signup-visual-stage{min-height:275px}.cc-scene-card{padding:18px}.cc-signup-headline-wrap{min-height:118px}}
 @media(max-width:850px){.cc-signup-visual-stage{display:none}}
 @media(max-height:850px) and (min-width:851px){.cc-signup-showcase{padding-top:25px;padding-bottom:22px}.cc-signup-brand{font-size:19px}.cc-signup-headline-wrap{min-height:105px}.cc-signup-headline-wrap h1{font-size:clamp(36px,4vw,52px)}.cc-signup-headline-wrap p{margin-top:10px;font-size:12px}.cc-signup-visual-stage{min-height:250px}.cc-scene-card{min-height:230px;padding:17px 20px}.cc-team-scene-flow{margin:23px 0 17px}.cc-signup-bottom{margin-top:12px}}
+
+
+/* Minimal signup form: email + password + confirmation only */
+.cc-signup-panel-inner{max-width:470px}
+.cc-signup-heading{margin-bottom:27px}
+.cc-signup-form{gap:17px}
+.cc-signup-field label{font-size:10px}
+.cc-signup-input{min-height:49px;padding:0 13px}
+.cc-signup-input input{font-size:12px}
+.cc-signup-submit{min-height:52px;margin-top:5px}
+.cc-signup-divider{margin-top:21px}
+.cc-signup-google{min-height:51px}
+.cc-signup-signin{margin-top:22px}
+.cc-signup-legal{margin-top:17px}
+@media(max-width:850px){.cc-signup-panel{align-items:center}.cc-signup-panel-inner{max-width:470px}}
+@media(max-width:520px){.cc-signup-form{gap:14px}.cc-signup-input{min-height:47px}.cc-signup-heading{margin-bottom:23px}}

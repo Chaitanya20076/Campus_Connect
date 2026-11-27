@@ -60,6 +60,7 @@ function App() {
             element={<ComingSoon title="Event Details" />}
           />
 
+
           <Route
             path="/host-dashboard"
             element={<ComingSoon title="Host Dashboard" />}
@@ -74,9 +75,10 @@ function App() {
           <Route path="/terms" element={<Terms />} />
         </Route>
 
-        {/* FULL-SCREEN AUTH PAGE — OUTSIDE PRE-AUTH LAYOUT */}
+        {/* FULL-SCREEN AUTH PAGES — OUTSIDE PRE-AUTH LAYOUT */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<ComingSoon title="Complete Your CampusConnect Profile" />} />
 
         {/* PAGES OUTSIDE THE PUBLIC LAYOUT */}
         <Route

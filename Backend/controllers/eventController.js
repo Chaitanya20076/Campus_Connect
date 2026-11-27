@@ -8,17 +8,27 @@ export async function discoverEventsController(req, res) {
     console.log("📥 Event discovery request received");
 
     const {
-      query,
+      query = "",
       location = "",
       category = "",
       maxResults = 10,
       includeImages = true,
     } = req.body || {};
 
-    if (!query || typeof query !== "string" || !query.trim()) {
+    const cleanQuery =
+      typeof query === "string" ? query.trim() : "";
+
+    const cleanLocation =
+      typeof location === "string" ? location.trim() : "";
+
+    const cleanCategory =
+      typeof category === "string" ? category.trim() : "";
+
+    // At least one filter must be provided.
+    if (!cleanQuery && !cleanLocation && !cleanCategory) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a valid search query",
+        message: "Please provide at least one search filter: query, location, or category",
       });
     }
 
@@ -43,11 +53,9 @@ export async function discoverEventsController(req, res) {
     }
 
     const result = await discoverEvents({
-      query: query.trim(),
-      location:
-        typeof location === "string" ? location.trim() : "",
-      category:
-        typeof category === "string" ? category.trim() : "",
+      query: cleanQuery,
+      location: cleanLocation,
+      category: cleanCategory,
       maxResults: parsedMaxResults,
       includeImages,
     });

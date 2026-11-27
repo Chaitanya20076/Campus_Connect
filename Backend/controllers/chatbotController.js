@@ -1,6 +1,10 @@
 
 import { chatWithCampusConnect } from "../services/chatbot/chatbotService.js";
 
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_HISTORY_MESSAGES = 20;
+const MAX_HISTORY_ITEM_LENGTH = 2000;
+
 export async function chatbotMessageController(req, res) {
   try {
     console.log("📥 Chatbot message received");
@@ -10,9 +14,7 @@ export async function chatbotMessageController(req, res) {
       conversationHistory = [],
     } = req.body || {};
 
-    // Validate message
     if (
-      !message ||
       typeof message !== "string" ||
       !message.trim()
     ) {
@@ -22,7 +24,13 @@ export async function chatbotMessageController(req, res) {
       });
     }
 
-    // Validate conversation history
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({
+        success: false,
+        message: `Message cannot exceed ${MAX_MESSAGE_LENGTH} characters`,
+      });
+    }
+
     if (!Array.isArray(conversationHistory)) {
       return res.status(400).json({
         success: false,
@@ -30,11 +38,10 @@ export async function chatbotMessageController(req, res) {
       });
     }
 
-    // Prevent excessively large conversation histories
-    if (conversationHistory.length > 20) {
+    if (conversationHistory.length > MAX_HISTORY_MESSAGES) {
       return res.status(400).json({
         success: false,
-        message: "Maximum 20 conversation history messages allowed",
+        message: `Maximum ${MAX_HISTORY_MESSAGES} conversation history messages allowed`,
       });
     }
 
@@ -49,6 +56,13 @@ export async function chatbotMessageController(req, res) {
           message: "Invalid conversation history format",
         });
       }
+
+      if (item.content.length > MAX_HISTORY_ITEM_LENGTH) {
+        return res.status(400).json({
+          success: false,
+          message: `Each conversation history message cannot exceed ${MAX_HISTORY_ITEM_LENGTH} characters`,
+        });
+      }
     }
 
     const result = await chatWithCampusConnect({
@@ -57,13 +71,14 @@ export async function chatbotMessageController(req, res) {
     });
 
     return res.status(200).json(result);
-
   } catch (error) {
     console.error("Chatbot controller error:", error);
 
     return res.status(500).json({
       success: false,
-      message: error.message || "CampusConnect AI is temporarily unavailable",
+      message:
+        error.message ||
+        "CampusConnect AI is temporarily unavailable",
     });
   }
 }

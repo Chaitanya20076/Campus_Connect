@@ -60,11 +60,31 @@ function calculateEventScore(event) {
   return score;
 }
 
+function getSourceUrlKeys(event) {
+  return new Set(
+    (event.sources || [])
+      .map((source) => normaliseUrl(source?.url))
+      .filter(Boolean)
+  );
+}
+
 function areDuplicates(first, second) {
   const a = getEventIdentity(first);
   const b = getEventIdentity(second);
 
-  // Exact official registration URL match.
+  // Event names must match before any URL/date comparison. A shared generic
+  // registration form must never merge two differently named events.
+  if (!a.name || !b.name || a.name !== b.name) {
+    return false;
+  }
+
+  // Two explicitly different start dates indicate different editions/events.
+  // This check takes priority over matching URLs or organisers.
+  if (a.date && b.date && a.date !== b.date) {
+    return false;
+  }
+
+  // Exact event-specific registration URL match.
   if (
     a.registration &&
     b.registration &&
@@ -73,45 +93,31 @@ function areDuplicates(first, second) {
     return true;
   }
 
-  // Exact official website match with matching event name.
+  // Exact event information page match.
   if (
     a.website &&
     b.website &&
-    a.website === b.website &&
-    a.name === b.name
+    a.website === b.website
   ) {
     return true;
   }
 
-  // Names must match before comparing other event attributes.
-  if (!a.name || !b.name || a.name !== b.name) {
-    return false;
-  }
-
-  // Same event name and same date.
+  // Same event name and same explicitly stated start date.
   if (a.date && b.date && a.date === b.date) {
     return true;
   }
 
-  // Same event name and same organiser, when date is unavailable.
-  if (
-    a.organizer &&
-    b.organizer &&
-    a.organizer === b.organizer &&
-    (!a.date || !b.date)
-  ) {
-    return true;
+  // If one or both dates are missing, require a shared source URL before
+  // merging. Matching names and organisers alone are not enough: they can
+  // describe different annual editions of the same event.
+  const firstSources = getSourceUrlKeys(first);
+  const secondSources = getSourceUrlKeys(second);
+
+  for (const sourceUrl of firstSources) {
+    if (secondSources.has(sourceUrl)) return true;
   }
 
-  // Same name and organiser even if one source lacks a date.
-  if (
-    a.organizer &&
-    b.organizer &&
-    a.organizer === b.organizer
-  ) {
-    return true;
-  }
-
+  // Same organiser is supporting evidence, but never sufficient on its own.
   return false;
 }
 

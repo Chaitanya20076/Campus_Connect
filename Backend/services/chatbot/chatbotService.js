@@ -1,15 +1,12 @@
 
 import { generateSarvamResponse } from "../events/sarvamService.js";
 import { discoverEvents } from "../events/eventDiscoveryService.js";
-
 import { getEventByCCID } from "../events/eventStore.js";
-
 import { CAMPUSCONNECT_SYSTEM_PROMPT } from "./chatbotPrompt.js";
 
 const CCID_REGEX = /\bCC-\d{4}-[A-F0-9]{8}\b/gi;
 
-// Extract unique CCIDs from text.
-function extractCCIDs(text) {
+function extractCCIDs(text = "") {
   return [
     ...new Set(
       (text.match(CCID_REGEX) || []).map((ccid) =>
@@ -19,7 +16,21 @@ function extractCCIDs(text) {
   ];
 }
 
-// Detect requests that need live event discovery.
+function getIndiaDate() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts.map(({ type, value }) => [type, value])
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 function isEventSearchRequest(message) {
   const patterns = [
     /\b(find|search|discover|show|list|explore|recommend)\b.*\b(events?|hackathons?|workshops?|competitions?|fests?|conferences?|seminars?|webinars?)\b/i,
@@ -31,28 +42,24 @@ function isEventSearchRequest(message) {
   return patterns.some((pattern) => pattern.test(message));
 }
 
-// Detect upcoming event requests.
 function isUpcomingRequest(message) {
   return /\b(upcoming|future|coming soon|yet to happen|not happened yet)\b/i.test(
     message
   );
 }
 
-// Detect ongoing event requests.
 function isOngoingRequest(message) {
   return /\b(ongoing|happening now|currently happening|live events?)\b/i.test(
     message
   );
 }
 
-// Detect follow-up questions.
 function isEventFollowUp(message) {
   return /\b(which one|which event|the first|the second|the third|that event|this event|those events|these events|highest prize|lowest prize|compare them|compare these|both events|their eligibility|its eligibility|its deadline|that one|its prize|their prizes|registration deadline)\b/i.test(
     message
   );
 }
 
-// Resolve only the exact CCIDs mentioned in conversation history.
 function resolveHistoryEvents(history) {
   const requestedCCIDs = new Set();
 
@@ -84,7 +91,6 @@ function resolveHistoryEvents(history) {
   };
 }
 
-// Remove duplicate events based on CCID.
 function uniqueEvents(events) {
   const unique = new Map();
 
@@ -97,7 +103,6 @@ function uniqueEvents(events) {
   return Array.from(unique.values());
 }
 
-// Safely parse Sarvam's JSON response.
 function parseChatbotResponse(content) {
   try {
     const cleaned = content
@@ -111,22 +116,30 @@ function parseChatbotResponse(content) {
 
     if (
       typeof parsed.reply !== "string" ||
+      !parsed.reply.trim() ||
       !Array.isArray(parsed.suggestedQuestions) ||
       !Array.isArray(parsed.events)
     ) {
       throw new Error("Invalid chatbot response structure");
     }
 
+    if (
+      !parsed.suggestedQuestions.every(
+        (question) => typeof question === "string"
+      )
+    ) {
+      throw new Error("Invalid suggestedQuestions format");
+    }
+
     return parsed;
   } catch (error) {
     console.error("Chatbot JSON parsing error:", error.message);
-    console.error("Raw response:", content.slice(0, 2000));
+    console.error("Raw response:", String(content).slice(0, 2000));
 
     throw new Error("The AI assistant returned an invalid response");
   }
 }
 
-// Return a deterministic response when an exact event cannot be retrieved.
 function unavailableEventResponse(ccids, contextType) {
   const referenceText = ccids.join(", ");
 
@@ -146,7 +159,31 @@ function unavailableEventResponse(ccids, contextType) {
   };
 }
 
-// Main CampusConnect chatbot service.
+// Include useful event groups without presenting completed or
+// location-unconfirmed events as relevant recommendations.
+function collectDiscoveryEvents(discoveryResult) {
+  const groups = discoveryResult?.eventGroups;
+
+  if (!groups || typeof groups !== "object") {
+    return Array.isArray(discoveryResult?.events)
+      ? discoveryResult.events
+      : [];
+  }
+
+  const eligibleGroups = [
+    "actionable",
+    "registrationClosed",
+    "registrationNotOpen",
+    "dateUnconfirmed",
+  ];
+
+  const combined = eligibleGroups.flatMap((groupName) =>
+    Array.isArray(groups[groupName]) ? groups[groupName] : []
+  );
+
+  return uniqueEvents(combined).slice(0, 10);
+}
+
 export async function chatWithCampusConnect({
   message,
   conversationHistory = [],
@@ -180,15 +217,15 @@ export async function chatWithCampusConnect({
   let filteringApplied = "none";
   let missingHistoryCCIDs = [];
 
-  // 2. Check whether the current message contains CCIDs.
+  // 2. Exact CCID lookup takes priority over natural-language search.
   const currentCCIDs = extractCCIDs(userMessage);
 
   if (currentCCIDs.length > 0) {
     contextType = "ccid_lookup";
 
-    const resolved = resolveHistoryEvents(
-      [{ role: "user", content: userMessage }]
-    );
+    const resolved = resolveHistoryEvents([
+      { role: "user", content: userMessage },
+    ]);
 
     eventContext = resolved.events;
 
@@ -202,7 +239,7 @@ export async function chatWithCampusConnect({
     console.log("🎯 Retrieved exact CCIDs:", currentCCIDs);
   }
 
-  // 3. Perform live event discovery.
+  // 3. Live event discovery.
   else if (isEventSearchRequest(userMessage)) {
     contextType = "live_event_search";
 
@@ -214,7 +251,7 @@ export async function chatWithCampusConnect({
       includeImages: false,
     });
 
-    eventContext = discoveryResult.events || [];
+    eventContext = collectDiscoveryEvents(discoveryResult);
 
     if (isUpcomingRequest(userMessage)) {
       eventContext = eventContext.filter(
@@ -235,7 +272,7 @@ export async function chatWithCampusConnect({
     );
   }
 
-  // 4. Handle follow-up questions using exact conversation references.
+  // 4. Follow-up questions use exact CCIDs from conversation history.
   else if (isEventFollowUp(userMessage)) {
     contextType = "event_follow_up";
 
@@ -248,8 +285,6 @@ export async function chatWithCampusConnect({
       `🧠 Restored ${eventContext.length} exact event records`
     );
 
-    // If the conversation mentioned CCIDs but none can be retrieved,
-    // never silently replace them with other stored events.
     if (
       resolved.requestedCCIDs.length > 0 &&
       eventContext.length === 0
@@ -260,7 +295,6 @@ export async function chatWithCampusConnect({
       );
     }
 
-    // If there was no identifiable event reference, ask for one.
     if (resolved.requestedCCIDs.length === 0) {
       return {
         success: true,
@@ -277,7 +311,7 @@ export async function chatWithCampusConnect({
     }
   }
 
-  // 5. Handle ordinary questions.
+  // 5. Ordinary questions can use exact event records from history.
   else {
     contextType = "general";
 
@@ -295,8 +329,8 @@ ${contextType}
 EVENT FILTER:
 ${filteringApplied}
 
-CURRENT DATE:
-${new Date().toISOString().slice(0, 10)}
+CURRENT DATE (INDIA):
+${getIndiaDate()}
 
 STUDENT MESSAGE:
 ${userMessage}
@@ -343,23 +377,26 @@ IMPORTANT INSTRUCTIONS:
 11. Do not present date-unconfirmed events as confirmed upcoming
     events. Explain that their dates need verification.
 
-12. Never invent event details, dates, prizes or registration links.
+12. If registration is closed or not yet open, clearly state that.
+    Do not imply that registration is currently available.
 
-13. If information is unavailable, say so clearly.
+13. Never invent event details, dates, prizes or registration links.
 
-14. Never claim that an event is officially verified unless
+14. If information is unavailable, say so clearly.
+
+15. Never claim that an event is officially verified unless
     the verification data supports that statement.
 
-15. Return only the exact JSON response format required
+16. Return only the exact JSON response format required
     by your system prompt.
 
-16. If no relevant event records are available, return an
+17. If no relevant event records are available, return an
     empty events array.
 
-17. Never claim that planned CampusConnect features are already
+18. Never claim that planned CampusConnect features are already
     operational.
 
-18. If some event references are unavailable but other exact
+19. If some event references are unavailable but other exact
     event records are available, answer only using the available
     records and clearly disclose the missing references.
 `;
